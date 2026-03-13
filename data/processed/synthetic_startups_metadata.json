@@ -1,0 +1,32 @@
+{
+  "rows": 1000,
+  "columns": [
+    "startup_name",
+    "sector",
+    "stage",
+    "region",
+    "business_model",
+    "founded_year",
+    "team_size",
+    "founder_count",
+    "founder_experience_years",
+    "has_technical_founder",
+    "funding_total_usd",
+    "monthly_burn_usd",
+    "runway_months",
+    "revenue_growth_pct",
+    "customer_growth_pct",
+    "churn_pct",
+    "burn_multiple",
+    "annual_revenue_run_rate",
+    "description",
+    "founder_bios",
+    "recent_update",
+    "failed_within_24_months",
+    "risk_score"
+  ],
+  "label_distribution": {
+    "0": 714,
+    "1": 286
+  }
+}

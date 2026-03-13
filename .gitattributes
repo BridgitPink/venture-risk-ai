@@ -1,0 +1,63 @@
+# ---------------------------------------------------------
+# Line endings
+# ---------------------------------------------------------
+
+# Use LF for all text files (consistent across OS)
+* text=auto eol=lf
+
+# ---------------------------------------------------------
+# Data files — never modify line endings
+# ---------------------------------------------------------
+
+*.csv binary
+*.tsv binary
+*.xlsx binary
+*.parquet binary
+*.feather binary
+*.pkl binary
+*.joblib binary
+
+# ---------------------------------------------------------
+# Notebooks
+# ---------------------------------------------------------
+
+*.ipynb text eol=lf
+
+# ---------------------------------------------------------
+# Code files
+# ---------------------------------------------------------
+
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+
+# ---------------------------------------------------------
+# Images / media — treat as binary
+# ---------------------------------------------------------
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg binary
+
+# ---------------------------------------------------------
+# Compressed / archives — binary
+# ---------------------------------------------------------
+
+*.zip binary
+*.gz binary
+*.tar binary
+*.7z binary
+
+# ---------------------------------------------------------
+# Model artifacts — binary
+# ---------------------------------------------------------
+
+*.h5 binary
+*.pt binary
+*.onnx binary
+*.bin binary

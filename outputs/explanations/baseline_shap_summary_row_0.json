@@ -1,0 +1,58 @@
+{
+  "row_index": 0,
+  "startup_name": "SaasLabs0002",
+  "base_value": -1.7889870205379277,
+  "approx_model_output": -1.1780281277886877,
+  "top_contributors": [
+    {
+      "feature": "num__runway_months",
+      "shap_value": -2.1091738344009174,
+      "abs_shap_value": 2.1091738344009174
+    },
+    {
+      "feature": "num__revenue_growth_pct",
+      "shap_value": 1.6236168604674521,
+      "abs_shap_value": 1.6236168604674521
+    },
+    {
+      "feature": "num__churn_pct",
+      "shap_value": 1.0484643443197617,
+      "abs_shap_value": 1.0484643443197617
+    },
+    {
+      "feature": "num__burn_multiple",
+      "shap_value": 0.7982120957058848,
+      "abs_shap_value": 0.7982120957058848
+    },
+    {
+      "feature": "cat__stage_series_a",
+      "shap_value": -0.45840162682675223,
+      "abs_shap_value": 0.45840162682675223
+    },
+    {
+      "feature": "num__founder_experience_years",
+      "shap_value": 0.4436199623659618,
+      "abs_shap_value": 0.4436199623659618
+    },
+    {
+      "feature": "cat__sector_saas",
+      "shap_value": -0.4359406026670259,
+      "abs_shap_value": 0.4359406026670259
+    },
+    {
+      "feature": "num__customer_growth_pct",
+      "shap_value": 0.2753961877080254,
+      "abs_shap_value": 0.2753961877080254
+    },
+    {
+      "feature": "num__has_technical_founder",
+      "shap_value": -0.2549831380251291,
+      "abs_shap_value": 0.2549831380251291
+    },
+    {
+      "feature": "cat__region_us",
+      "shap_value": -0.14518213076324468,
+      "abs_shap_value": 0.14518213076324468
+    }
+  ]
+}

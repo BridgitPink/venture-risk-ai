@@ -1,0 +1,58 @@
+{
+  "row_index": 0,
+  "startup_name": "SaasLabs0002",
+  "base_value": -15.232006582367054,
+  "approx_model_output": -16.386039960505062,
+  "top_contributors": [
+    {
+      "feature": "emb__emb_208",
+      "shap_value": -0.6673647753806138,
+      "abs_shap_value": 0.6673647753806138
+    },
+    {
+      "feature": "emb__emb_113",
+      "shap_value": 0.6537710754153616,
+      "abs_shap_value": 0.6537710754153616
+    },
+    {
+      "feature": "emb__emb_187",
+      "shap_value": -0.5818426171090124,
+      "abs_shap_value": 0.5818426171090124
+    },
+    {
+      "feature": "emb__emb_148",
+      "shap_value": 0.47744282507605146,
+      "abs_shap_value": 0.47744282507605146
+    },
+    {
+      "feature": "emb__emb_93",
+      "shap_value": -0.46195726280769767,
+      "abs_shap_value": 0.46195726280769767
+    },
+    {
+      "feature": "emb__emb_236",
+      "shap_value": -0.44083407210152836,
+      "abs_shap_value": 0.44083407210152836
+    },
+    {
+      "feature": "emb__emb_279",
+      "shap_value": 0.4248589946520575,
+      "abs_shap_value": 0.4248589946520575
+    },
+    {
+      "feature": "emb__emb_20",
+      "shap_value": 0.42184944059781887,
+      "abs_shap_value": 0.42184944059781887
+    },
+    {
+      "feature": "emb__emb_77",
+      "shap_value": -0.4084154613838248,
+      "abs_shap_value": 0.4084154613838248
+    },
+    {
+      "feature": "emb__emb_226",
+      "shap_value": 0.37899457717783724,
+      "abs_shap_value": 0.37899457717783724
+    }
+  ]
+}

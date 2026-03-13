@@ -1,0 +1,62 @@
+{
+  "baseline": {
+    "accuracy": 0.7405405405405405,
+    "precision": 0.5955056179775281,
+    "recall": 0.8153846153846154,
+    "f1_score": 0.6883116883116883,
+    "roc_auc": 0.8142307692307693,
+    "confusion_matrix": [
+      [
+        84,
+        36
+      ],
+      [
+        12,
+        53
+      ]
+    ]
+  },
+  "embedding_model": {
+    "accuracy": 0.7297297297297297,
+    "precision": 0.5882352941176471,
+    "recall": 0.7692307692307693,
+    "f1_score": 0.6666666666666666,
+    "roc_auc": 0.806923076923077,
+    "confusion_matrix": [
+      [
+        85,
+        35
+      ],
+      [
+        15,
+        50
+      ]
+    ]
+  },
+  "delta_vs_baseline": {
+    "accuracy": -0.010810810810810811,
+    "precision": -0.007270323859881023,
+    "recall": -0.0461538461538461,
+    "f1_score": -0.02164502164502169,
+    "roc_auc": -0.007307692307692348
+  },
+  "dropped_all_null_numeric_columns": [
+    "founded_year",
+    "team_size",
+    "founder_count",
+    "founder_experience_years",
+    "has_technical_founder",
+    "monthly_burn_usd",
+    "runway_months",
+    "revenue_growth_pct",
+    "customer_growth_pct",
+    "churn_pct",
+    "burn_multiple",
+    "annual_revenue_run_rate",
+    "company_age_years",
+    "milestones_per_year",
+    "years_to_first_funding",
+    "years_to_last_funding"
+  ],
+  "dropped_all_null_categorical_columns": []
+}

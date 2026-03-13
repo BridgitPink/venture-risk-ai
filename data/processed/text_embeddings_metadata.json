@@ -1,0 +1,12 @@
+{
+  "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+  "rows": 1000,
+  "embedding_dimensions": 384,
+  "text_columns": [
+    "description",
+    "founder_bios",
+    "recent_update"
+  ],
+  "output_data_path": "data\\processed\\synthetic_startups_with_embeddings.parquet",
+  "output_matrix_path": "data\\processed\\text_embeddings.npy"
+}
