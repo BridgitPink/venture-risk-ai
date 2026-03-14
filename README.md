@@ -1,240 +1,198 @@
-# Startup Failure Predictor AI
+# Venture Risk AI — Startup Failure Prediction
 
-AI system that predicts the probability a startup will fail within 24 months using **venture signals, machine learning, semantic embeddings, and explainable AI (SHAP)**.
+Machine learning pipeline that predicts whether a startup will **fail within 24 months** using venture signals, enriched startup datasets, and interpretable models.
 
-This project demonstrates how **structured business data + NLP embeddings + interpretable ML** can be combined to estimate startup survival risk.
+This project demonstrates how **structured venture data + external startup datasets + explainable machine learning** can be used to estimate startup survival risk.
 
-The goal of the project is to showcase **practical ML system design and explainability**, not to provide real investment advice.
+⚠️ This project is intended for **research and educational purposes only** and does not provide investment advice.
 
 ---
 
 # Project Overview
 
-Startups fail for many reasons:
+Startup failure prediction is difficult due to limited data, noisy signals, and survivorship bias.
 
-- weak product–market fit
-- limited runway
-- poor retention
-- inefficient capital usage
-- inexperienced founding teams
+This project builds a reproducible ML pipeline that:
 
-This project builds a model that analyzes a startup profile and produces:
+1. Cleans and labels startup outcome data
+2. Merges external venture datasets (~125k startups)
+3. Enriches the labeled startup dataset
+4. Trains a failure prediction model
+5. Generates interpretable explanations for predictions
 
-- Failure probability
-- Survival probability
-- Risk band
-- Top risk factors
-- Positive signals
-- Strategic recommendations
+The model predicts:
 
-The system mimics the reasoning process a **venture analyst or investment associate** might use when screening startups.
+```
+failed_within_24_months
+```
+
+for each startup.
 
 ---
 
 # Example Output
 
+Example prediction output from `predict.py`:
+
 ```
 Startup: SignalForge AI
-Model: embedding
-Predicted outcome: survive_24_months
-Failure probability: 0.31
-Risk band: medium
 
-Top risk factors
-- Runway is moderate and may become a constraint if growth stalls
+Failure probability: 0.31
+Survival probability: 0.69
+Risk band: Medium
+
+Top risk signals
+- Limited funding rounds
+- Early stage company
 
 Positive signals
-- Presence of a technical founder
-- Strong customer growth
-
-Recommendations
-- Improve capital efficiency
-- Monitor churn and retention metrics
+- Strong investor participation
+- High milestone completion
 ```
 
 ---
 
-# Architecture
+# Machine Learning Pipeline
 
 ```
-Startup Profile
-      ↓
+Raw Startup Dataset
+        ↓
+Data Cleaning
+        ↓
+External Dataset Merge
+        ↓
 Feature Engineering
-      ↓
-Embedding Generation (Sentence Transformers)
-      ↓
-Machine Learning Model
-      ↓
+        ↓
+Logistic Regression Model
+        ↓
 Failure Probability
-      ↓
-Reasoning Engine
-      ↓
-Human‑Readable Risk Report
-      ↓
-SHAP Explainability
+        ↓
+Explainability (SHAP)
 ```
-
-Two model pipelines are implemented.
-
-### Baseline Model
-
-Uses **structured startup signals only**.
-
-Purpose:
-
-- establish a benchmark
-- demonstrate experiment design
-
-### Embedding Model
-
-Uses:
-
-- structured signals
-- semantic embeddings from startup text
-
-This allows the model to learn patterns in:
-
-- startup descriptions
-- founder bios
-- investor updates
 
 ---
 
-# Explainable AI (SHAP)
+# Model Performance
 
-The project integrates **SHAP (SHapley Additive exPlanations)** to make model predictions interpretable.
+Final model performance on the test set:
 
-SHAP explains:
+| Metric | Score |
+|------|------|
+Accuracy | **0.735**
+Precision | **0.589**
+Recall | **0.815**
+F1 Score | **0.684**
+ROC-AUC | **0.810**
 
-- which features increased failure risk
-- which features reduced failure risk
-- how much each feature contributed to the final prediction
+The model intentionally prioritizes **recall for failing startups**, which is valuable in venture-risk analysis.
 
-Outputs include:
-
-- global feature importance
-- beeswarm distribution plots
-- individual startup explanations (waterfall plots)
-
-Example explanation insights:
-
-- limited runway increased failure probability
-- high churn increased risk
-- strong revenue growth reduced risk
-- presence of a technical founder reduced risk
-
-Generated explanation artifacts:
+Confusion matrix:
 
 ```
-outputs/explanations/
-
-baseline_shap_global_bar.png
-baseline_shap_beeswarm.png
-baseline_shap_waterfall_row_0.png
-
-embedding_shap_global_bar.png
-embedding_shap_beeswarm.png
-embedding_shap_waterfall_row_0.png
+[[83, 37],
+ [12, 53]]
 ```
 
 ---
 
 # Features Used
 
-## Numeric Signals
+### Numeric Signals
 
 - funding_total_usd
-- monthly_burn_usd
-- runway_months
-- revenue_growth_pct
-- customer_growth_pct
-- churn_pct
-- burn_multiple
-- annual_revenue_run_rate
-- founder_experience_years
-- team_size
+- funding_rounds
+- milestones
+- relationships
+- avg_participants
+- funding_per_round_usd
+- has_vc
+- has_angel
+- has_roundA
+- has_roundB
+- has_roundC
+- has_roundD
+- is_top500
+- latitude
+- longitude
+- external_founded_year
+- external_funding_total_usd
+- external_funding_rounds
+- external_startup_age_years
+- has_external_match
 
-## Categorical Signals
+### Categorical Signals
 
 - sector
 - stage
 - region
 - business_model
+- external_sector
+- external_region
 
-## Text Signals
+---
 
-Embedded using **Sentence Transformers**.
+# Explainable AI (SHAP)
 
-- startup description
-- founder bios
-- investor updates
+The project integrates **SHAP (SHapley Additive exPlanations)** to interpret model predictions.
 
-Embedding model:
+SHAP helps explain:
+
+- which features increased failure risk
+- which features reduced failure risk
+- how much each signal contributed to the prediction
+
+Example insights:
+
+- strong investor relationships reduce failure risk
+- higher milestone completion correlates with survival
+- certain regions or sectors may have higher failure rates
+
+Generated explanation artifacts are saved to:
 
 ```
-all-MiniLM-L6-v2
+outputs/explanations/
 ```
 
 ---
 
-# Dataset
+# External Data Enrichment
 
-Real startup failure datasets are difficult to obtain and often incomplete.
+The labeled startup dataset is enriched using external venture datasets containing **125k+ startup records**.
 
-This project uses a **synthetic but realistic startup dataset generator**.
+External features include:
 
-The generator creates startup profiles containing:
-
+- founding year
+- funding totals
+- funding rounds
+- startup age
 - sector
-- stage
-- founder experience
-- team size
-- funding
-- burn
-- runway
-- revenue growth
-- churn
-- founder bios
-- startup description
+- region
 
-A synthetic risk scoring function produces the label:
-
-```
-failed_within_24_months
-```
-
-Generated datasets:
-
-```
-data/processed/synthetic_startups.csv
-```
-
-Embedding dataset:
-
-```
-data/processed/synthetic_startups_with_embeddings.parquet
-```
+These signals significantly improve model performance compared to using the raw dataset alone.
 
 ---
 
 # Repository Structure
 
 ```
-startup-failure-predictor-ai
+venture-risk-ai
 
 src/
-  data_gen.py
-  embedder.py
+  prepare_real_data.py
+  merge_external_datasets.py
+  enrich_labeled_data.py
   train.py
-  train_with_embeddings.py
   predict.py
   explain.py
-
+  run_pipeline.py
 
 data/
   processed/
 
 models/
+  startup_risk_metrics.json
+  startup_risk_feature_importance.csv
+  startup_risk_test_predictions.csv
 
 outputs/
   explanations/
@@ -247,21 +205,32 @@ requirements.txt
 
 # Installation
 
-Clone the repository
+Clone the repository:
 
 ```
-git clone https://github.com/yourusername/startup-failure-predictor-ai.git
-cd startup-failure-predictor-ai
+git clone https://github.com/YOUR_USERNAME/venture-risk-ai.git
+cd venture-risk-ai
 ```
 
-Create virtual environment
+Create a virtual environment:
 
 ```
-python -m venv venv
-source venv/bin/activate
+python -m venv .venv
 ```
 
-Install dependencies
+Activate the environment:
+
+Windows:
+```
+.venv\Scripts\activate
+```
+
+Mac/Linux:
+```
+source .venv/bin/activate
+```
+
+Install dependencies:
 
 ```
 pip install -r requirements.txt
@@ -269,114 +238,40 @@ pip install -r requirements.txt
 
 ---
 
-# Usage
+# Running the Pipeline
 
-## Step 1 — Generate Synthetic Dataset
-
-```
-python src/data_gen.py
-```
-
-Output:
+Run the full pipeline:
 
 ```
-data/processed/synthetic_startups.csv
+python src/run_pipeline.py
 ```
 
----
-
-## Step 2 — Generate Text Embeddings
+Pipeline steps:
 
 ```
-python src/embedder.py
+prepare_real_data.py
+merge_external_datasets.py
+enrich_labeled_data.py
+train.py
 ```
 
 Outputs:
 
 ```
-data/processed/synthetic_startups_with_embeddings.parquet
-```
-
-```
-data/processed/text_embeddings.npy
-```
-
----
-
-## Step 3 — Train Baseline Model
-
-```
-python src/train.py
-```
-
-Artifacts:
-
-```
-models/baseline_logreg.joblib
-models/baseline_metrics.json
+models/startup_risk_metrics.json
+models/startup_risk_feature_importance.csv
+models/startup_risk_test_predictions.csv
 ```
 
 ---
 
-## Step 4 — Train Embedding Model
-
-```
-python src/train_with_embeddings.py
-```
-
-Artifacts:
-
-```
-models/embedding_logreg.joblib
-models/embedding_metrics.json
-models/model_comparison.json
-```
-
----
-
-## Step 5 — Generate Model Explanations
-
-```
-python src/explain.py --mode embedding
-```
-
-Example:
-
-```
-python src/explain.py --mode baseline --row-index 0
-```
-
-Explanation artifacts saved to:
-
-```
-outputs/explanations/
-```
-
----
-
-## Step 6 — Make Predictions
-
-Default (embedding model):
+# Making Predictions
 
 ```
 python src/predict.py
 ```
 
-Explicit modes:
-
-Baseline model
-
-```
-python src/predict.py --mode baseline
-```
-
-Embedding model
-
-```
-python src/predict.py --mode embedding
-```
-
-Prediction output:
+Prediction output is saved to:
 
 ```
 outputs/prediction.json
@@ -384,54 +279,133 @@ outputs/prediction.json
 
 ---
 
-# Model Choice
+# Why Logistic Regression?
 
-Baseline model:
-
-```
-Logistic Regression
-```
-
-Reasons:
+The project uses logistic regression because it is:
 
 - interpretable
-- stable baseline
-- strong for tabular signals
-
-Embedding model combines:
-
-- structured venture signals
-- semantic startup descriptions
+- stable on tabular venture data
+- easy to explain with SHAP
+- a strong baseline for structured features
 
 Future models may include:
 
 - XGBoost
 - LightGBM
-- neural architectures
+- Gradient Boosting
+- Hybrid ML architectures
 
 ---
 
 # Future Improvements
 
-Planned upgrades:
+Possible extensions:
 
 ### Interactive Dashboard
-
 Build a **Streamlit interface** where users can:
 
 - enter startup metrics
 - see predictions
 - view feature explanations
 
-### Vector Similarity Search
+### Feature Expansion
+Add additional venture signals such as:
 
-Compare startups with similar historical profiles using embedding similarity.
+- founder background features
+- funding stage timelines
+- investor network graphs
 
 ### Advanced Models
+Evaluate more advanced models:
 
 - XGBoost
 - LightGBM
-- hybrid neural models
+- ensemble models
+
+---
+# Key Insights from the Model
+
+Beyond predicting startup failure, the model reveals several patterns commonly associated with startup survival and failure.
+
+These insights come from the model’s **feature coefficients and SHAP explanations**.
+
+### Strong Signals of Startup Survival
+
+Several features were consistently associated with **lower failure risk**:
+
+- **Investor relationships**
+  
+  Startups with stronger investor participation and network relationships were less likely to fail.
+
+- **Milestone completion**
+
+  Companies that consistently achieved operational milestones showed significantly better survival rates.
+
+- **Higher funding per round**
+
+  Larger average funding rounds often indicate stronger investor confidence and better capital efficiency.
+
+These features likely reflect **organizational maturity and market validation**.
+
+---
+
+### Signals Associated with Higher Failure Risk
+
+The model identified several patterns correlated with increased failure probability:
+
+- **Early-stage startups**
+
+  Companies at earlier stages have higher uncertainty and failure rates.
+
+- **Limited funding rounds**
+
+  Fewer funding rounds often correlate with limited investor confidence or stalled growth.
+
+- **Certain regional startup ecosystems**
+
+  Regional startup ecosystems can affect survival probability due to differences in funding availability and network effects.
+
+---
+
+### Venture Interpretation
+
+These patterns align with observations from venture capital research:
+
+- **Investor network strength** improves access to capital and strategic guidance.
+- **Milestone execution** signals operational discipline.
+- **Capital efficiency** improves runway and growth sustainability.
+
+While the model is purely statistical, its signals reflect **real venture ecosystem dynamics**.
+
+---
+
+### Example Feature Importance
+
+Top signals identified by the model include:
+
+```
+relationships
+milestones
+funding_per_round_usd
+region
+sector
+```
+
+These features had the strongest influence on predicted startup outcomes.
+
+---
+
+### Why This Matters
+
+Startup prediction models are rarely perfect due to the complexity of innovation and markets.
+
+However, models like this can help:
+
+- identify **early warning signals**
+- prioritize **startup due diligence**
+- support **venture portfolio risk analysis**
+
+This project demonstrates how **machine learning and explainable AI can assist venture decision workflows**.
 
 ---
 
@@ -439,7 +413,7 @@ Compare startups with similar historical profiles using embedding similarity.
 
 This project is for **educational and portfolio purposes only**.
 
-Predictions are generated using **synthetic data** and should not be used for investment decisions.
+The model should not be used for real investment decisions.
 
 ---
 
