@@ -8,7 +8,6 @@ from typing import Any, Dict
 import joblib
 import numpy as np
 import pandas as pd
-from sentence_transformers import SentenceTransformer
 
 
 BASELINE_MODEL_PATH = Path("models/baseline_logreg.joblib")
@@ -18,28 +17,12 @@ OUTPUT_PATH = Path("outputs/prediction.json")
 EMBEDDER_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
 NUMERIC_FEATURES = [
-    "founded_year",
-    "team_size",
-    "founder_count",
-    "founder_experience_years",
-    "has_technical_founder",
     "funding_total_usd",
-    "monthly_burn_usd",
-    "runway_months",
-    "revenue_growth_pct",
-    "customer_growth_pct",
-    "churn_pct",
-    "burn_multiple",
-    "annual_revenue_run_rate",
     "funding_rounds",
     "milestones",
     "relationships",
     "avg_participants",
-    "company_age_years",
     "funding_per_round_usd",
-    "milestones_per_year",
-    "years_to_first_funding",
-    "years_to_last_funding",
     "has_vc",
     "has_angel",
     "has_roundA",
@@ -82,9 +65,17 @@ class StartupPredictor:
         self.embedder_model_name = embedder_model_name
 
         self.model = self._load_model()
-        self.embedder: SentenceTransformer | None = None
+        self.embedder = None
 
         if self.model_mode == "embedding":
+            try:
+                from sentence_transformers import SentenceTransformer
+            except ImportError as exc:
+                raise ImportError(
+                    "sentence-transformers is required for embedding mode. "
+                    "Install it with: pip install sentence-transformers"
+                ) from exc
+
             self.embedder = SentenceTransformer(self.embedder_model_name)
 
     def _load_model(self):
@@ -93,11 +84,13 @@ class StartupPredictor:
             if self.model_mode == "embedding"
             else self.baseline_model_path
         )
+
         if not model_path.exists():
             raise FileNotFoundError(
                 f"Model not found at {model_path}. "
                 "Run the appropriate training script first."
             )
+
         return joblib.load(model_path)
 
     def predict(self, record: Dict[str, Any]) -> Dict[str, Any]:
@@ -139,7 +132,7 @@ class StartupPredictor:
         normalized = normalize_record(record)
 
         if self.model_mode == "baseline":
-            feature_columns = NUMERIC_FEATURES + CATEGORICAL_FEATURES + ["combined_text"]
+            feature_columns = NUMERIC_FEATURES + CATEGORICAL_FEATURES
             row = {col: normalized[col] for col in feature_columns}
             return pd.DataFrame([row])
 
@@ -157,11 +150,13 @@ class StartupPredictor:
     def _embed_text(self, text: str) -> np.ndarray:
         if self.embedder is None:
             raise RuntimeError("Embedder is not initialized. Use model_mode='embedding'.")
+
         embedding = self.embedder.encode(
             [text],
             convert_to_numpy=True,
             normalize_embeddings=True,
         )[0]
+
         return embedding.astype(np.float32)
 
 
@@ -218,10 +213,8 @@ def generate_reasoning(record: Dict[str, Any], failure_probability: float) -> Di
     relationships = coerce_numeric(record.get("relationships"), 0.0)
     avg_participants = coerce_numeric(record.get("avg_participants"), 0.0)
     company_age_years = coerce_numeric(record.get("company_age_years"), 0.0)
-    funding_per_round = coerce_numeric(record.get("funding_per_round_usd"), 0.0)
     milestones_per_year = coerce_numeric(record.get("milestones_per_year"), 0.0)
     years_to_first_funding = coerce_numeric(record.get("years_to_first_funding"), 0.0)
-    years_to_last_funding = coerce_numeric(record.get("years_to_last_funding"), 0.0)
 
     has_vc = int(coerce_numeric(record.get("has_vc"), 0.0))
     has_angel = int(coerce_numeric(record.get("has_angel"), 0.0))
@@ -231,8 +224,8 @@ def generate_reasoning(record: Dict[str, Any], failure_probability: float) -> Di
     has_roundD = int(coerce_numeric(record.get("has_roundD"), 0.0))
     is_top500 = int(coerce_numeric(record.get("is_top500"), 0.0))
 
-    sector = str(record.get("sector", "") or "")
-    stage = str(record.get("stage", "") or "")
+    sector = str(record.get("sector", "") or "").lower()
+    stage = str(record.get("stage", "") or "").lower()
 
     if funding_total <= 0:
         reasons.append("The company shows no recorded funding, which may indicate limited traction or support.")
@@ -300,7 +293,7 @@ def generate_reasoning(record: Dict[str, Any], failure_probability: float) -> Di
     elif stage in {"series_a", "series_b"} and milestones < 2:
         reasons.append("Later stage positioning is not matched by strong milestone count.")
 
-    if sector in {"biotech"} and funding_total < 1_000_000:
+    if sector == "biotech" and funding_total < 1_000_000:
         reasons.append("Biotech startups often require more capital than currently recorded.")
     if sector in {"software", "web", "mobile"} and milestones == 0:
         reasons.append("The startup operates in a fast-moving sector but shows no recorded milestones.")
@@ -374,7 +367,7 @@ def parse_args() -> argparse.Namespace:
         "--mode",
         type=str,
         choices=["baseline", "embedding"],
-        default="embedding",
+        default="baseline",
         help="Prediction mode: baseline or embedding.",
     )
     return parser.parse_args()

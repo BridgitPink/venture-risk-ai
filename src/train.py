@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import List, Tuple
+from typing import Tuple
 
 import joblib
 import pandas as pd
@@ -25,35 +25,19 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 TARGET_COLUMN = "failed_within_24_months"
 DROP_COLUMNS = ["startup_name", "risk_score"]
+
 MODEL_DIR = Path("models")
 DATA_PATH = Path("data/processed/real_startups_model_ready.csv")
 METRICS_PATH = MODEL_DIR / "baseline_metrics.json"
 MODEL_PATH = MODEL_DIR / "baseline_logreg.joblib"
 
-
 NUMERIC_FEATURES = [
-    "founded_year",
-    "team_size",
-    "founder_count",
-    "founder_experience_years",
-    "has_technical_founder",
     "funding_total_usd",
-    "monthly_burn_usd",
-    "runway_months",
-    "revenue_growth_pct",
-    "customer_growth_pct",
-    "churn_pct",
-    "burn_multiple",
-    "annual_revenue_run_rate",
     "funding_rounds",
     "milestones",
     "relationships",
     "avg_participants",
-    "company_age_years",
     "funding_per_round_usd",
-    "milestones_per_year",
-    "years_to_first_funding",
-    "years_to_last_funding",
     "has_vc",
     "has_angel",
     "has_roundA",
@@ -72,37 +56,24 @@ CATEGORICAL_FEATURES = [
     "business_model",
 ]
 
-TEXT_FEATURES = [
-    "description",
-    "founder_bios",
-    "recent_update",
-]
-
 
 def load_dataset(csv_path: Path = DATA_PATH) -> pd.DataFrame:
     if not csv_path.exists():
         raise FileNotFoundError(
-            f"Dataset not found at {csv_path}. Run `python src/data_gen.py` first."
+            f"Dataset not found at {csv_path}. Run your data preparation pipeline first."
         )
     return pd.read_csv(csv_path)
 
 
-def combine_text_columns(df: pd.DataFrame, text_columns: List[str]) -> pd.Series:
-    return (
-        df[text_columns]
-        .fillna("")
-        .astype(str)
-        .agg(" ".join, axis=1)
-        .str.replace(r"\s+", " ", regex=True)
-        .str.strip()
-    )
-
-
 def prepare_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:
     working_df = df.copy()
-    working_df["combined_text"] = combine_text_columns(working_df, TEXT_FEATURES)
 
-    feature_columns = NUMERIC_FEATURES + CATEGORICAL_FEATURES + ["combined_text"]
+    required_columns = NUMERIC_FEATURES + CATEGORICAL_FEATURES + [TARGET_COLUMN]
+    missing_columns = [col for col in required_columns if col not in working_df.columns]
+    if missing_columns:
+        raise ValueError(f"Missing required columns in dataset: {missing_columns}")
+
+    feature_columns = NUMERIC_FEATURES + CATEGORICAL_FEATURES
     X = working_df[feature_columns]
     y = working_df[TARGET_COLUMN]
     return X, y
@@ -123,9 +94,6 @@ def build_pipeline() -> Pipeline:
         ]
     )
 
-    # Phase 1 baseline:
-    # We intentionally ignore raw text here so the first model is a clean
-    # structured-data baseline. Embeddings can be added in the next phase.
     preprocessor = ColumnTransformer(
         transformers=[
             ("num", numeric_transformer, NUMERIC_FEATURES),
@@ -160,7 +128,12 @@ def evaluate_model(model: Pipeline, X_test: pd.DataFrame, y_test: pd.Series) -> 
         "f1": float(f1_score(y_test, y_pred, zero_division=0)),
         "roc_auc": float(roc_auc_score(y_test, y_proba)),
         "confusion_matrix": confusion_matrix(y_test, y_pred).tolist(),
-        "classification_report": classification_report(y_test, y_pred, zero_division=0, output_dict=True),
+        "classification_report": classification_report(
+            y_test,
+            y_pred,
+            zero_division=0,
+            output_dict=True,
+        ),
     }
     return metrics
 
@@ -185,8 +158,6 @@ def print_summary(metrics: dict) -> None:
 
 def main() -> None:
     df = load_dataset()
-
-    # Safety check: drop columns that should never be used directly as features.
     df = df.drop(columns=[col for col in DROP_COLUMNS if col in df.columns])
 
     X, y = prepare_features(df)
